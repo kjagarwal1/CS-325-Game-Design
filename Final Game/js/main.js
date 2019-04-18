@@ -14,32 +14,46 @@ window.onload = function() {
 
     function preload() {
         // Load an image and call it 'logo'.
-        game.load.image( 'back', 'assets/back.png' );
-        game.load.image( 'rocket', 'assets/rocket.png' );
-        game.load.image( 'asteroid', 'assets/asteroid.png' );
-        game.load.image( 'coin', 'assets/coin.png' );
+        game.load.image( 'bucket', 'assets/bucket.jpg' );
+        game.load.image('ball', 'assets/ball.png')
+        game.load.image('asteroid', 'assets/asteroid.png');
     }
 
-    var back;
-    var score = 0;
+    var bucket;
+    var ball;
+    var background;
+    var asteroidSprite;
+    var hit=false;
 
     function create() {
         // Create a sprite at the center of the screen using the 'logo' image.
-        back = game.add.sprite( game.world.centerX, game.world.centerY, 'back' );
+        //background = game.add.image( game.world.centerX, game.world.centerY, 'back' );
         // Anchor the sprite at its center, as opposed to its top-left corner.
         // so it will be truly centered.
-        back.anchor.setTo( 0.5, 0.5 );
+        //background.anchor.setTo( 0.5, 0.5 );
+
+        bucket = game.add.sprite( game.world.centerX, game.world.centerY, 'bucket' );
+        bucket.anchor.setTo(0.5, 0.5);
+        bucket.scale.setTo(0.4, 0.4);
+        game.physics.enable( bucket, Phaser.Physics.REAL );
+        bucket.body.immovable = true;
+
+        ball = game.add.sprite(game.world.centerX, game.world.centerY + 200, 'ball');
+        ball.anchor.setTo(0.5, 0.5);
+        ball.scale.setTo(0.05,0.05);
+        game.physics.enable( ball, Phaser.Physics.REAL );
+
+
 
         // Turn on the arcade physics engine for this sprite.
-        game.physics.enable( bouncy, Phaser.Physics.ARCADE );
+        //game.physics.enable( bouncy, Phaser.Physics.ARCADE );
         // Make it bounce off of the world bounds.
-        back.body.collideWorldBounds = true;
+        //bouncy.body.collideWorldBounds = true;
 
         // Add some text using a CSS style.
         // Center it in X, and position its top 15 pixels from the top of the world.
         var style = { font: "25px Verdana", fill: "#9999ff", align: "center" };
         var text = game.add.text( game.world.centerX, 15, "Build something amazing.", style );
-        //var scoreBoard = 
         text.anchor.setTo( 0.5, 0.0 );
     }
 
@@ -49,6 +63,33 @@ window.onload = function() {
         // in X or Y.
         // This function returns the rotation angle that makes it visually match its
         // new trajectory.
-        back.rotation = game.physics.arcade.accelerateToPointer( back, game.input.activePointer, 500, 500, 500 );
+        //bouncy.rotation = game.physics.arcade.accelerateToPointer( bouncy, game.input.activePointer, 500, 500, 500 );
+
+        game.physics.arcade.collide(bucket, ball, collisionDetected);
+
+        game.debug.text("Left Button: " + game.input.activePointer.leftButton.isDown, 300, 132);
+        bucket.x += 2;
+
+        if(game.input.activePointer.leftButton.isDown)
+        {
+          hit = true
+        }
+        if(hit){
+            ball.y -= 2;
+        }
+
+        ball.rotation = game.physics.arcade.accelerateToPointer( ball, game.input.activePointer, 500, 500, 500 );
+
+        //bucketMove();
+    }
+
+    function collisionDetected()
+    {
+      console.log("KJ is cool");
+    }
+
+    function bucketMove()
+    {
+        bucket.x += 4;
     }
 };
