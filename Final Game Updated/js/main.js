@@ -14,13 +14,18 @@ window.onload = function() {
 
     function preload() {
         // Load an image and call it 'logo'.
-        game.load.image( 'bucket', 'assets/bucket.jpg' );
-        game.load.image('ball', 'assets/ball.png')
-        game.load.image('asteroid', 'assets/asteroid.png');
-    }
+        game.load.image('grass','assets/grass.jpg');
+        game.load.image('bucket', 'assets/bucket.png');
+        game.load.image('ball', 'assets/ball.png');
+        game.load.audio('cheer', 'sounds/cheer.wav');
+        game.load.audio('boo', 'sounds/boo.wav');
+        }
 
+    var grass;
     var bucket;
     var ball;
+    var cheer;
+    var boo;
     var background;
     var asteroidSprite;
     var hit=false;
@@ -38,10 +43,14 @@ window.onload = function() {
         // Anchor the sprite at its center, as opposed to its top-left corner.
         // so it will be truly centered.
         //background.anchor.setTo( 0.5, 0.5 );
+        boo = game.add.audio('boo');
+        cheer = game.add.audio('cheer');
+        grass = game.add.sprite(0,0,'grass');
+        grass.scale.setTo(4,3);
 
         bucket = game.add.sprite( game.world.centerX, game.world.centerY, 'bucket' );
         bucket.anchor.setTo(0.5, 0.5);
-        bucket.scale.setTo(0.4, 0.4);
+        bucket.scale.setTo(0.2, 0.2);
         bucket.y = 150;
         game.physics.enable( bucket, Phaser.Physics.REAL );
         bucket.body.immovable = true;
@@ -49,7 +58,7 @@ window.onload = function() {
 
         ball = game.add.sprite(game.world.centerX, game.world.centerY + 200, 'ball');
         ball.anchor.setTo(0.5, 0.5);
-        ball.scale.setTo(0.05,0.05);
+        ball.scale.setTo(0.5,0.5);
         game.physics.enable( ball, Phaser.Physics.REAL );
 
 
@@ -94,8 +103,10 @@ window.onload = function() {
 
     function followTheBall()
     {
-      function keepCarInBounds()
-    {
+      if(!hit)
+        ball.x = game.input.mousePointer.x;
+
+      /*
       if(ball.x > 0 && ball.x < 700)
       {
         game.physics.arcade.moveToXY(ball, game.input.mousePointer.x, 600, 300);
@@ -107,8 +118,7 @@ window.onload = function() {
       else if(ball.x <= 700)
       {
         game.physics.arcade.moveToXY(ball, 700, 600, 300);
-      }
-}
+      }*/
     }
 
     function handleInput()
@@ -126,7 +136,7 @@ window.onload = function() {
     {
       ball = game.add.sprite(game.world.centerX, game.world.centerY + 200, 'ball');
       ball.anchor.setTo(0.5, 0.5);
-      ball.scale.setTo(0.05,0.05);
+      ball.scale.setTo(0.5,0.5);
       game.physics.enable( ball, Phaser.Physics.REAL );
     }
 
@@ -138,6 +148,8 @@ window.onload = function() {
       if(scoreCount > highScore){
         highScore = scoreCount;
       }
+
+      cheer.play();
 
       spawnTheBall();
 
@@ -162,6 +174,7 @@ window.onload = function() {
         spawnTheBall();
         hit = false;
         scoreCount = 0;
+        boo.play();
       }
     }
 };
