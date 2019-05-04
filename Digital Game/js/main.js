@@ -8,12 +8,14 @@ window.onload = function() {
         game.load.image( 'spaceship', 'assets/spaceship.png' );
         game.load.image( 'asteroid', 'assets/asteroid.png' )
         game.load.image( 'explosion', 'assets/explosion.png' )
+        game.load.audio( 'sound', 'assets/explode.wav');
     }
 
     var spaceship;
     var back0;
     var back1;
     var explosion;
+    var sound;
 
     var size = 50;
     var count;
@@ -50,7 +52,7 @@ window.onload = function() {
         game.physics.enable(spaceship, Phaser.Physics.REAL );
         explosion = game.add.sprite(-500, -500, 'explosion');
         explosion.anchor.setTo(0.5, 0.5);
-
+        sound = game.add.audio('sound');
     }
 
     function update() {
@@ -193,6 +195,7 @@ window.onload = function() {
     function collisionDetected(){
       explosion.x = spaceship.x;
       explosion.y = spaceship.y;
+      sound.play();
       spaceship.x = -500;
       asteroid[i].x = -400;
       alive = false;
