@@ -98,7 +98,7 @@ window.onload = function() {
           asteroid[i] = game.add.sprite(Math.floor(Math.random()*350), Math.floor(Math.random()*250), 'asteroid');
         }
         asteroid[i].anchor.setTo(0.5, 0.5);
-        asteroid[i].scale.setTo(.75,.75);
+        asteroid[i].scale.setTo(.05,.05);
 
 
         if( i%4 == 0 ){
@@ -140,7 +140,7 @@ window.onload = function() {
           asteroidY[i] = 1;
         }
         asteroid[i].anchor.setTo(0.5, 0.5);
-        asteroid[i].scale.setTo(.75,.75);
+        asteroid[i].scale.setTo(.05,.05);
       }
     }
 
