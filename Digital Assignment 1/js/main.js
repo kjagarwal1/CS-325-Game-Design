@@ -41,7 +41,7 @@ window.onload = function() {
                 button.y = (Math.random()*400) + 150;
             }
             
-            text.setText("Time Left: " + (Math.floor(time / 60)) + "\nScore: " + score);
+            text.setText("Time Left: " + (Math.floor(time / 30)) + "\nScore: " + score);
             time--;
 
             if(time == 0){
@@ -55,7 +55,7 @@ window.onload = function() {
         else if(hit){
             hit = false;
             playing = true;
-            time = 3600;
+            time = 1800;
             score = 0;
         }
     }
