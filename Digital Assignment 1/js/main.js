@@ -37,26 +37,26 @@ window.onload = function() {
             if(hit){
                 score++;
                 hit = false;
-                // move button
+                button.x = (Math.random()*600)+100;
+                button.y = (Math.random()*400) + 150;
             }
             
-            text.setText("Time Left: " + ((time / 60) | 0) + "\nScore: " + score);
+            text.setText("Time Left: " + (Math.floor(time / 60)) + "\nScore: " + score);
             time--;
 
             if(time == 0){
                 playing = false;
                 hit = false;
                 text.setText("GAME OVER\nScore: " + score + "\nClick to Play again");
-                //reset button
+                button.x = game.world.centerX;
+                button.y = game.world.centerY + 100;
             }
         }
         else if(hit){
             hit = false;
-            // playing = true;
-            // time = 3600;
-            // score = 0;
-            score++;
-            text.setText("It's working: " + score);
+            playing = true;
+            time = 3600;
+            score = 0;
         }
     }
 
