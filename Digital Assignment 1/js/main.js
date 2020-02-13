@@ -19,15 +19,19 @@ window.onload = function() {
     var button;
     var text;
     var playing;
+    var hit;
     var score;
-
+    
     function create() {
         button = game.add.sprite( game.world.centerX, game.world.centerY + 100, 'click');
         button.scale.setTo(.3,.3);
         button.anchor.setTo(0.5,0.5);
+        image.events.onInputDown.add(listener, this);
+
 
         playing = false;
-        score = 0;
+        hit = false;
+        score = 3600;
 
         var style = { font: "25px Verdana", fill: "#9999ff", align: "center" };
         text = game.add.text( game.world.centerX, 15, "Click me as many time as you can in 1 minute!\nScore: " + score, style );
@@ -39,7 +43,19 @@ window.onload = function() {
 
         }else{
 
+            if(hit){
+                score++
+                hit = false;
+            }
+
         }
 
+        text.setText("Click me as many time as you can in 1 minute!\nScore: " + score);
+
     }
+
+    function listener() {
+        hit = true;
+    }
+
 };
