@@ -11,21 +11,35 @@ window.onload = function() {
     // All loading functions will typically all be found inside "preload()".
 
     var game = new Phaser.Game( 800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update } );
-
+    
     function preload() {
-        game.load.image('click', 'assets/click.jpg');
+        game.load.image('click', 'assets/click.png');
     }
 
     var button;
+    var text;
+    var playing;
+    var score;
 
     function create() {
         button = game.add.sprite( game.world.centerX, game.world.centerY + 100, 'click');
+        button.scale.setTo(.3,.3);
+        button.anchor.setTo(0.5,0.5);
+
+        playing = false;
+        score = 0;
 
         var style = { font: "25px Verdana", fill: "#9999ff", align: "center" };
-        var text = game.add.text( game.world.centerX, 15, "Click me as many time as you can in 1 minute.", style );
+        text = game.add.text( game.world.centerX, 15, "Click me as many time as you can in 1 minute!\nScore: " + score, style );
         text.anchor.setTo( 0.5, 0.0 );
     }
 
     function update() {
+        if(playing){
+
+        }else{
+
+        }
+
     }
 };
