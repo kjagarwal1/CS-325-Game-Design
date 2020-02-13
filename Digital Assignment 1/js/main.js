@@ -26,7 +26,7 @@ window.onload = function() {
         button = game.add.sprite( game.world.centerX, game.world.centerY + 100, 'click');
         button.scale.setTo(.3,.3);
         button.anchor.setTo(0.5,0.5);
-        image.events.onInputDown.add(listener, this);
+        button.events.onInputDown.add(listener, this);
 
 
         playing = false;
@@ -44,7 +44,7 @@ window.onload = function() {
         }else{
 
             if(hit){
-                score++
+                score++;
                 hit = false;
             }
 
