@@ -31,31 +31,82 @@ window.onload = function() {
     var timer;
     var alive = true;
 
+    //new code
+    var keyb;
+    var map;
+    var player;
+
+    var arrowKey, leftKey, rightKey, upKey, downKey, shiftKey;
+    
     function create() {
-        back0 = game.add.sprite(0, 0, 'background');
-        back1 = game.add.sprite(0, -768, 'background');
+        back0 = game.add.sprite(5000, 5000, 'background');
 
         spaceship = game.add.sprite(game.world.centerX, game.world.centerY, 'spaceship');
         spaceship.anchor.setTo(0.5, 0.5);
         spaceship.scale.setTo(.15,.15);
 
-        style = { font: "25px Verdana", fill: "#9999ff", align: "center" };
-        text = game.add.text(game.world.centerX, 30, "Current Score: " + score + "            High Score: " + highScore, style );
-        text.anchor.setTo(0.5, 0.5);
-
         timer = 0;
         score = 0;
         count = 20;
         highScore = 0;
-        setUpAsteroids();
 
         game.physics.enable(spaceship, Phaser.Physics.REAL );
         explosion = game.add.sprite(-500, -500, 'explosion');
         explosion.anchor.setTo(0.5, 0.5);
         sound = game.add.audio('sound');
+
+        game.world.resize(10000, 10000);
+        game.camera.x = game.world.centerX;
+        game.camera.y = game.world.centerY;
+        
+        spaceship.fixedToCamera = true;
+        
+        style = { font: "25px Verdana", fill: "#9999ff", align: "center" };
+        text = game.add.text(game.world.centerX+400, game.world.centerY+60, "Use the arrow keys to move around!\nHolding shift will allow you to move faster!", style );
+        text.anchor.setTo(0.5, 0.5);
+
+        spaceship.bringToTop();
+
+        arrowKey = game.input.keyboard.createCursorKeys();
+        leftKey  = game.input.keyboard.addKey(Phaser.KeyCode.A);
+        rightKey = game.input.keyboard.addKey(Phaser.KeyCode.D);
+        upKey = game.input.keyboard.addKey(Phaser.KeyCode.W);
+        downKey = game.input.keyboard.addKey(Phaser.KeyCode.S);
+        shiftKey = game.input.keyboard.addKey(Phaser.KeyCode.SHIFT);
+
+
     }
 
     function update() {
+      if (arrowKey.right.isDown && shiftKey.isDown){
+        game.camera.x += 6;
+      }
+      else if (arrowKey.left.isDown && shiftKey.isDown ){
+        game.camera.x -= 6;
+      }
+      else if (arrowKey.right.isDown) {
+        game.camera.x += 3;
+      }
+      else if (arrowKey.left.isDown) {
+        game.camera.x -= 3;
+      }
+
+      if (arrowKey.up.isDown && shiftKey.isDown) {
+        game.camera.y -= 6;
+      }
+      else if (arrowKey.down.isDown && shiftKey.isDown) {
+        game.camera.y += 6;
+      }
+      else if (arrowKey.up.isDown) {
+        game.camera.y -= 3;
+      }
+      else if (arrowKey.down.isDown) {
+        game.camera.y += 3;
+      }
+
+    }
+
+    function ran(){
       moveSpaceship();
       moveAsteroids();
 
@@ -145,8 +196,8 @@ window.onload = function() {
     }
 
     function moveBackground(){
-      back0.y += 1;
-      back1.y += 1;
+      back0.y += 30;
+      back1.y += 30 ;
 
       if(back0.y > 600){
         back0.y = -(768+168);
@@ -195,7 +246,7 @@ window.onload = function() {
     function collisionDetected(){
       explosion.x = spaceship.x;
       explosion.y = spaceship.y;
-      sound.play();
+      //sound.play();
       spaceship.x = -500;
       asteroid[i].x = -400;
       alive = false;

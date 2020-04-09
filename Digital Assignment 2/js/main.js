@@ -1,69 +1,95 @@
 "use strict";
 
-window.onload = function () {
-    var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update });
+window.onload = function() {
+    // You can copy-and-paste the code from any of the examples at http://examples.phaser.io here.
+    // You will need to change the fourth parameter to "new Phaser.Game()" from
+    // 'phaser-example' to 'game', which is the id of the HTML element where we
+    // want the game to go.
+    // The assets (and code) can be found at: https://github.com/photonstorm/phaser/tree/master/examples/assets
+    // You will need to change the paths you pass to "game.load.image()" or any other
+    // loading functions to reflect where you are putting the assets.
+    // All loading functions will typically all be found inside "preload()".
+
+    var game = new Phaser.Game( 800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update } );
 
     function preload() {
-        game.load.image('click', 'assets/click.png');
+        // Load an image and call it 'logo'.
+        game.load.image( 'bucket', 'assets/bucket.jpg' );
+        game.load.image('ball', 'assets/ball.png')
+        game.load.image('asteroid', 'assets/asteroid.png');
     }
 
-    var button;
-    var text;
-    var playing;
-    var hit;
-    var score;
-    var time;
+    var bucket;
+    var ball;
+    var background;
+    var asteroidSprite;
+    var hit=false;
 
     function create() {
-        button = game.add.sprite(game.world.centerX, game.world.centerY + 100, 'click');
-        button.scale.setTo(.3, .3);
-        button.anchor.setTo(0.5, 0.5);
-        button.inputEnabled = true;
-        button.events.onInputDown.add(listener, this);
+        // Create a sprite at the center of the screen using the 'logo' image.
+        //background = game.add.image( game.world.centerX, game.world.centerY, 'back' );
+        // Anchor the sprite at its center, as opposed to its top-left corner.
+        // so it will be truly centered.
+        //background.anchor.setTo( 0.5, 0.5 );
+
+        bucket = game.add.sprite( game.world.centerX, game.world.centerY, 'bucket' );
+        bucket.anchor.setTo(0.5, 0.5);
+        bucket.scale.setTo(0.4, 0.4);
+        game.physics.enable( bucket, Phaser.Physics.REAL );
+        bucket.body.immovable = true;
+
+        ball = game.add.sprite(game.world.centerX, game.world.centerY + 200, 'ball');
+        ball.anchor.setTo(0.5, 0.5);
+        ball.scale.setTo(0.05,0.05);
+        game.physics.enable( ball, Phaser.Physics.REAL );
 
 
-        playing = false;
-        hit = false;
-        score = 0;
-        time = 0;
 
+        // Turn on the arcade physics engine for this sprite.
+        //game.physics.enable( bouncy, Phaser.Physics.ARCADE );
+        // Make it bounce off of the world bounds.
+        //bouncy.body.collideWorldBounds = true;
+
+        // Add some text using a CSS style.
+        // Center it in X, and position its top 15 pixels from the top of the world.
         var style = { font: "25px Verdana", fill: "#9999ff", align: "center" };
-        text = game.add.text(game.world.centerX, 15, "Click me as many time as you can in 30 seconds!\nScore: " + score, style);
-        text.anchor.setTo(0.5, 0.0);
+        var text = game.add.text( game.world.centerX, 15, "Build something amazing.", style );
+        text.anchor.setTo( 0.5, 0.0 );
     }
 
     function update() {
-        if (playing) {
-            if (hit) {
-                score++;
-                hit = false;
-                button.x = (Math.random() * 600) + 100;
-                button.y = (Math.random() * 400) + 150;
-            }
+        // Accelerate the 'logo' sprite towards the cursor,
+        // accelerating at 500 pixels/second and moving no faster than 500 pixels/second
+        // in X or Y.
+        // This function returns the rotation angle that makes it visually match its
+        // new trajectory.
+        //bouncy.rotation = game.physics.arcade.accelerateToPointer( bouncy, game.input.activePointer, 500, 500, 500 );
 
-            text.setText("Time Left: " + (Math.floor(time / 30)) + " seconds\nScore: " + score);
-            time--;
+        game.physics.arcade.collide(bucket, ball, collisionDetected);
 
-            if (time == 0) {
-                playing = false;
-                hit = false;
-                text.setText("GAME OVER\nScore: " + score + "\nClick to Play again");
-                button.x = game.world.centerX;
-                button.y = game.world.centerY + 100;
-            }
+        game.debug.text("Left Button: " + game.input.activePointer.leftButton.isDown, 300, 132);
+        bucket.x += 2;
+
+        if(game.input.activePointer.leftButton.isDown)
+        {
+          hit = true
         }
-        else if (hit) {
-            hit = false;
-            playing = true;
-            time = 900;
-            score = 0;
-            button.x = (Math.random() * 600) + 100;
-            button.y = (Math.random() * 400) + 150;
+        if(hit){
+            ball.y -= 2;
         }
+
+        ball.rotation = game.physics.arcade.accelerateToPointer( ball, game.input.activePointer, 500, 500, 500 );
+
+        //bucketMove();
     }
 
-    function listener() {
-        hit = true;
+    function collisionDetected()
+    {
+      console.log("KJ is cool");
     }
 
+    function bucketMove()
+    {
+        bucket.x += 4;
+    }
 };
