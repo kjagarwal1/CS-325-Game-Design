@@ -8,14 +8,14 @@ window.onload = function() {
         game.load.image( 'spaceship', 'assets/spaceship.png' );
         game.load.image( 'asteroid', 'assets/asteroid.png' )
         game.load.image( 'explosion', 'assets/explosion.png' )
-        game.load.audio( 'sound', 'assets/explode.wav');
+        game.load.audio( 'music', 'audio/music.wav');
     }
 
     var spaceship;
     var back0;
     var back1;
     var explosion;
-    var sound;
+    var music;
 
     var size = 50;
     var count;
@@ -29,7 +29,6 @@ window.onload = function() {
     var score;
     var highScore;
     var timer;
-    var alive = true;
 
     //new code
     var keyb;
@@ -53,7 +52,6 @@ window.onload = function() {
         game.physics.enable(spaceship, Phaser.Physics.REAL );
         explosion = game.add.sprite(-500, -500, 'explosion');
         explosion.anchor.setTo(0.5, 0.5);
-        sound = game.add.audio('sound');
 
         game.world.resize(10000, 10000);
         game.camera.x = game.world.centerX;
@@ -74,7 +72,9 @@ window.onload = function() {
         downKey = game.input.keyboard.addKey(Phaser.KeyCode.S);
         shiftKey = game.input.keyboard.addKey(Phaser.KeyCode.SHIFT);
 
-
+        music = game.add.audio('music');
+        music.loop = true;
+        music.play();
     }
 
     function update() {
