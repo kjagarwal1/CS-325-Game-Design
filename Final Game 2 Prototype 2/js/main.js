@@ -1,16 +1,7 @@
 "use strict";
 
 window.onload = function() {
-    // You can copy-and-paste the code from any of the examples at http://examples.phaser.io here.
-    // You will need to change the fourth parameter to "new Phaser.Game()" from
-    // 'phaser-example' to 'game', which is the id of the HTML element where we
-    // want the game to go.
-    // The assets (and code) can be found at: https://github.com/photonstorm/phaser/tree/master/examples/assets
-    // You will need to change the paths you pass to "game.load.image()" or any other
-    // loading functions to reflect where you are putting the assets.
-    // All loading functions will typically all be found inside "preload()".
-
-    var game = new Phaser.Game( 800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update } );
+    var game = new Phaser.Game( 600, 1000, Phaser.AUTO, 'game', { preload: preload, create: create, update: update } );
 
     function preload() {
         // Load an image and call it 'logo'.
@@ -26,8 +17,6 @@ window.onload = function() {
     var ball;
     var cheer;
     var boo;
-    var background;
-    var asteroidSprite;
     var hit=false;
     var scoreCount = 0;
     var highScore = 0;
@@ -35,63 +24,44 @@ window.onload = function() {
     var coolText;
     var style;
     var speedOfBucket = 3;
-  //  var moveLeft = false;
 
     function create() {
-        // Create a sprite at the center of the screen using the 'logo' image.
-        //background = game.add.image( game.world.centerX, game.world.centerY, 'back' );
-        // Anchor the sprite at its center, as opposed to its top-left corner.
-        // so it will be truly centered.
-        //background.anchor.setTo( 0.5, 0.5 );
         boo = game.add.audio('boo');
+        boo.volume = 0.3;
         cheer = game.add.audio('cheer');
-        grass = game.add.sprite(0,0,'grass');
-        grass.scale.setTo(4,3);
+        cheer.volume = 0.3;
+        
+        grass = game.add.sprite(0,650,'grass');
+        grass.scale.setTo(4, 3);
+        grass = game.add.sprite(0, 0, 'grass');
+        grass.scale.setTo(4, 3);
 
-        bucket = game.add.sprite( game.world.centerX, game.world.centerY, 'bucket' );
+        bucket = game.add.sprite( game.world.centerX, 100, 'bucket' );
         bucket.anchor.setTo(0.5, 0.5);
-        bucket.scale.setTo(0.2, 0.2);
-        bucket.y = 150;
+        bucket.scale.setTo(0.4, 0.2);
         game.physics.enable( bucket, Phaser.Physics.REAL );
         bucket.body.immovable = true;
         bucket.body.setSize(150, 150, 40, 40);
 
-        ball = game.add.sprite(game.world.centerX, game.world.centerY + 200, 'ball');
+        ball = game.add.sprite(game.world.centerX, 850, 'ball');
         ball.anchor.setTo(0.5, 0.5);
-        ball.scale.setTo(0.5,0.5);
+        ball.scale.setTo(0.25,0.25);
         game.physics.enable( ball, Phaser.Physics.REAL );
 
 
         style = { font: "25px Verdana", fill: "#9999ff", align: "center" };
-        coolText = game.add.text( game.world.centerX-250, 15, "Current Score: " + scoreCount + "            High Score: " + highScore, style );
-        //coolText2 = game.add.text( game.world.centerX+75, 15, "High Score: " + highScore, style );
-        // Turn on the arcade physics engine for this sprite.
-        //game.physics.enable( bouncy, Phaser.Physics.ARCADE );
-        // Make it bounce off of the world bounds.
-        //bouncy.body.collideWorldBounds = true;
-
-        // Add some text using a CSS style.
-        // Center it in X, and position its top 15 pixels from the top of the world.
+        coolText = game.add.text( game.world.centerX-250, 15, "Current Score: " + scoreCount + "        High Score: " + highScore, style );
     }
 
     function update() {
-        // Accelerate the 'logo' sprite towards the cursor,
-        // accelerating at 500 pixels/second and moving no faster than 500 pixels/second
-        // in X or Y.
-        // This function returns the rotation angle that makes it visually match its
-        // new trajectory.
-        //bouncy.rotation = game.physics.arcade.accelerateToPointer( bouncy, game.input.activePointer, 500, 500, 500 );
-
         game.physics.arcade.collide(bucket, ball, collisionDetected);
 
-        //game.debug.text("Left Button: " + game.input.activePointer.leftButton.isDown, 300, 132);
-
-        bucketMove();
+        //bucketMove();
 
         handleInput();
         followTheBall();
 
-        coolText.setText("Current Score: " + scoreCount + "            High Score: " + highScore);
+        coolText.setText("Current Score: " + scoreCount + "        High Score: " + highScore);
         speedOfBucket = 3 + (scoreCount / 5);
         //coolText2.setText("High Score: " + highScore);
 
@@ -148,7 +118,6 @@ window.onload = function() {
       if(scoreCount > highScore){
         highScore = scoreCount;
       }
-
       cheer.play();
 
       spawnTheBall();
