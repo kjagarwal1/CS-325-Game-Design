@@ -9,172 +9,419 @@ window.onload = function() {
     // You will need to change the paths you pass to "game.load.image()" or any other
     // loading functions to reflect where you are putting the assets.
     // All loading functions will typically all be found inside "preload()".
-
-    var game = new Phaser.Game( 800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update } );
-
+    
+    var game = new Phaser.Game( 768, 768, Phaser.AUTO, 'game', { preload: preload, create: create, update: update } );
+    
     function preload() {
         // Load an image and call it 'logo'.
-        game.load.image('grass','assets/grass.jpg');
-        game.load.image('bucket', 'assets/bucket.png');
-        game.load.image('ball', 'assets/ball.png');
-        game.load.audio('cheer', 'sounds/cheer.wav');
-        game.load.audio('boo', 'sounds/boo.wav');
+        game.load.image('background', 'assets/map/background.png')
+        game.load.image('policeNorth', 'assets/cars/policeNorth.png');
+        game.load.image('policeSouth', 'assets/cars/policeSouth.png');
+        game.load.image('policeEast', 'assets/cars/policeEast.png');
+        game.load.image('policeWest', 'assets/cars/policeWest.png');
+
+        game.load.audio('brakeSound', 'assets/sounds/brakeSound.mp3');
+        game.load.audio('crashSound', 'assets/sounds/crashSound.mp3');
+    }
+    
+    var background = null;
+
+    var carNorth1 = null;
+    var carNorth2 = null;
+    var carNorth3 = null;
+
+    var carSouth1 = null;
+    var carSouth2 = null;
+    var carSouth3 = null;
+
+    var carEast1 = null;
+    var carEast2 = null;
+    var carEast3 = null;
+
+    var carWest1 = null;
+    var carWest2 = null;
+    var carWest3 = null;
+
+    var gameOver = false;
+
+    var northStop;
+    var southStop;
+    var westStop;
+    var eastStop;
+
+    var brakeSound;
+    var crashSound;
+
+    var totalScore = 0;
+
+    
+    function create() {
+
+    	brakeSound = game.add.audio('brakeSound');
+    	crashSound = game.add.audio('crashSound');
+
+        northStop = game.input.keyboard.addKey(Phaser.Keyboard.UP);
+        southStop = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+        westStop = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+        eastStop = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+
+        background = game.add.sprite(game.world.centerX, game.world.centerY + 40, 'background');
+        background.scale.setTo(0.8, 0.8);
+        background.anchor.setTo(0.5, 0.5);
+
+        carNorth1 = game.add.sprite(397, 780, 'policeNorth');
+        game.physics.enable( carNorth1, Phaser.Physics.ARCADE );
+        carNorth1.inputEnabled = true;
+        carNorth2 = game.add.sprite(397, 780, 'policeNorth');
+        game.physics.enable( carNorth2, Phaser.Physics.ARCADE );
+        carNorth2.inputEnabled = true;
+        carNorth3 = game.add.sprite(397, 780, 'policeNorth');
+        game.physics.enable( carNorth3, Phaser.Physics.ARCADE );
+        carNorth3.inputEnabled = true;
+
+        carSouth1 = game.add.sprite(312, -120, 'policeSouth');
+        game.physics.enable( carSouth1, Phaser.Physics.ARCADE );
+        carSouth1.inputEnabled = true;
+        carSouth2 = game.add.sprite(312, -120, 'policeSouth');
+        game.physics.enable( carSouth2, Phaser.Physics.ARCADE );
+        carSouth2.inputEnabled = true;
+        carSouth3 = game.add.sprite(312, -120, 'policeSouth');
+        game.physics.enable( carSouth3, Phaser.Physics.ARCADE );
+        carSouth3.inputEnabled = true;
+
+        carEast1 = game.add.sprite(-120, 380, 'policeEast');
+        game.physics.enable( carEast1, Phaser.Physics.ARCADE );
+        carEast1.inputEnabled = true;
+        carEast2 = game.add.sprite(-120, 380, 'policeEast');
+        game.physics.enable( carEast2, Phaser.Physics.ARCADE );
+        carEast2.inputEnabled = true;
+        carEast3 = game.add.sprite(-120, 380, 'policeEast');
+        game.physics.enable( carEast3, Phaser.Physics.ARCADE );
+        carEast3.inputEnabled = true;
+
+        carWest1 = game.add.sprite(770, 312, 'policeWest');
+        game.physics.enable( carWest1, Phaser.Physics.ARCADE );
+        carWest1.inputEnabled = true;
+        carWest2 = game.add.sprite(770, 312, 'policeWest');
+        game.physics.enable( carWest2, Phaser.Physics.ARCADE );
+        carWest2.inputEnabled = true;
+        carWest3 = game.add.sprite(770, 312, 'policeWest');
+        game.physics.enable( carWest3, Phaser.Physics.ARCADE );
+        carWest3.inputEnabled = true;
+
+        var northCarSpawnTime = game.rnd.integerInRange(2, 5);
+        game.time.events.add(Phaser.Timer.SECOND * northCarSpawnTime, startRandomCars, this, "North1");
+
+        var southCarSpawnTime = game.rnd.integerInRange(2, 5);
+        game.time.events.add(Phaser.Timer.SECOND * southCarSpawnTime, startRandomCars, this, "South1");
+
+        var eastCarSpawnTime = game.rnd.integerInRange(2, 5);
+        game.time.events.add(Phaser.Timer.SECOND * eastCarSpawnTime, startRandomCars, this, "East1");
+
+        var westCarSpawnTime = game.rnd.integerInRange(2, 5);
+        game.time.events.add(Phaser.Timer.SECOND * westCarSpawnTime, startRandomCars, this, "West1");
+
+/*
+        game.time.events.add(Phaser.Timer.SECOND * (northCarSpawnTime + 2), startRandomCars, this, "North2");
+
+        game.time.events.add(Phaser.Timer.SECOND * (southCarSpawnTime + 2), startRandomCars, this, "South2");
+
+        game.time.events.add(Phaser.Timer.SECOND * (eastCarSpawnTime + 2), startRandomCars, this, "East2");
+
+        game.time.events.add(Phaser.Timer.SECOND * (westCarSpawnTime + 2), startRandomCars, this, "West2");*/
+
+        carNorth1.events.onInputDown.add(listener, {param1: "North1"});
+        carSouth1.events.onInputDown.add(listener, {param1: "South1"});
+        carWest1.events.onInputDown.add(listener, {param1: "West1"});
+        carEast1.events.onInputDown.add(listener, {param1: "East1"});
+
+        carNorth2.events.onInputDown.add(listener, {param1: "North2"});
+        carSouth2.events.onInputDown.add(listener, {param1: "South2"});
+        carWest2.events.onInputDown.add(listener, {param1: "West2"});
+        carEast2.events.onInputDown.add(listener, {param1: "East2"});
+        
+    }
+
+    function startRandomCars(car)
+    {
+        if(car == "North1")
+        {
+            carNorth1.body.velocity.setTo(0, -130);
+        }
+        if(car == "South1")
+        {
+            carSouth1.body.velocity.setTo(0, 130);
+        }
+        if(car == "East1")
+        {
+            carEast1.body.velocity.setTo(130, 0);
+        }
+        if(car == "South1")
+        {
+            carWest1.body.velocity.setTo(-130, 0);
         }
 
-    var grass;
-    var bucket;
-    var ball;
-    var cheer;
-    var boo;
-    var background;
-    var asteroidSprite;
-    var hit=false;
-    var scoreCount = 0;
-    var highScore = 0;
-    var moveRight = true;
-    var coolText;
-    var style;
-    var speedOfBucket = 3;
-  //  var moveLeft = false;
-
-    function create() {
-        // Create a sprite at the center of the screen using the 'logo' image.
-        //background = game.add.image( game.world.centerX, game.world.centerY, 'back' );
-        // Anchor the sprite at its center, as opposed to its top-left corner.
-        // so it will be truly centered.
-        //background.anchor.setTo( 0.5, 0.5 );
-        boo = game.add.audio('boo');
-        cheer = game.add.audio('cheer');
-        grass = game.add.sprite(0,0,'grass');
-        grass.scale.setTo(4,3);
-
-        bucket = game.add.sprite( game.world.centerX, game.world.centerY, 'bucket' );
-        bucket.anchor.setTo(0.5, 0.5);
-        bucket.scale.setTo(0.2, 0.2);
-        bucket.y = 150;
-        game.physics.enable( bucket, Phaser.Physics.REAL );
-        bucket.body.immovable = true;
-        bucket.body.setSize(150, 150, 40, 40);
-
-        ball = game.add.sprite(game.world.centerX, game.world.centerY + 200, 'ball');
-        ball.anchor.setTo(0.5, 0.5);
-        ball.scale.setTo(0.5,0.5);
-        game.physics.enable( ball, Phaser.Physics.REAL );
-
-
-        style = { font: "25px Verdana", fill: "#9999ff", align: "center" };
-        coolText = game.add.text( game.world.centerX-250, 15, "Current Score: " + scoreCount + "            High Score: " + highScore, style );
-        //coolText2 = game.add.text( game.world.centerX+75, 15, "High Score: " + highScore, style );
-        // Turn on the arcade physics engine for this sprite.
-        //game.physics.enable( bouncy, Phaser.Physics.ARCADE );
-        // Make it bounce off of the world bounds.
-        //bouncy.body.collideWorldBounds = true;
-
-        // Add some text using a CSS style.
-        // Center it in X, and position its top 15 pixels from the top of the world.
+        if(car == "North2")
+        {
+            carNorth2.body.velocity.setTo(0, -130);
+        }
+        if(car == "South2")
+        {
+            carSouth2.body.velocity.setTo(0, 130);
+        }
+        if(car == "East2")
+        {
+            carEast2.body.velocity.setTo(130, 0);
+        }
+        if(car == "South2")
+        {
+            carWest2.body.velocity.setTo(-130, 0);
+        }
     }
 
-    function update() {
-        // Accelerate the 'logo' sprite towards the cursor,
-        // accelerating at 500 pixels/second and moving no faster than 500 pixels/second
-        // in X or Y.
-        // This function returns the rotation angle that makes it visually match its
-        // new trajectory.
-        //bouncy.rotation = game.physics.arcade.accelerateToPointer( bouncy, game.input.activePointer, 500, 500, 500 );
-
-        game.physics.arcade.collide(bucket, ball, collisionDetected);
-
-        //game.debug.text("Left Button: " + game.input.activePointer.leftButton.isDown, 300, 132);
-
-        bucketMove();
-
-        handleInput();
-        followTheBall();
-
-        coolText.setText("Current Score: " + scoreCount + "            High Score: " + highScore);
-        speedOfBucket = 3 + (scoreCount / 5);
-        //coolText2.setText("High Score: " + highScore);
-
-
-        //ball.rotation = game.physics.arcade.accelerateToPointer( ball, game.input.activePointer, 500, 500, 500 );
-
-        //bucketMove();
-    }
-
-    function followTheBall()
+    function checkSpriteClicked()
     {
-      if(!hit)
-        ball.x = game.input.mousePointer.x;
+        /*
+        carNorth1.events.onInputDown.add(listener, {param1: "North1"});
+        carSouth1.events.onInputDown.add(listener, {param1: "South1"});
+        carWest1.events.onInputDown.add(listener, {param1: "West1"});
+        carEast1.events.onInputDown.add(listener, {param1: "East1"});*/
 
-      /*
-      if(ball.x > 0 && ball.x < 700)
-      {
-        game.physics.arcade.moveToXY(ball, game.input.mousePointer.x, 600, 300);
-      }
-      else if(ball.x >= 0)
-      {
-        game.physics.arcade.moveToXY(ball, 0, 600, 300);
-      }
-      else if(ball.x <= 700)
-      {
-        game.physics.arcade.moveToXY(ball, 700, 600, 300);
-      }*/
     }
 
-    function handleInput()
+    function listener(car)
     {
-      if(game.input.activePointer.leftButton.isDown)
-      {
-        hit = true;
-      }
-      if(hit){
-          ball.y -= 6;
-      }
+
+        if(this.param1 == "North1" && carNorth1.body.velocity.y < 0)
+        {
+            carNorth1.body.velocity.setTo(0,0);
+            brakeSound.play();
+        }
+        else if(this.param1 == "North1" && carNorth1.body.velocity.y == 0)
+        {
+            carNorth1.body.velocity.setTo(0,-130);
+        }
+        else if(this.param1 == "South1" && carSouth1.body.velocity.y > 0)
+        {
+            carSouth1.body.velocity.setTo(0,0);
+            brakeSound.play();
+        }
+        else if(this.param1 == "South1" && carSouth1.body.velocity.y == 0)
+        {
+            carSouth1.body.velocity.setTo(0,130);
+        }
+        else if(this.param1 == "West1" && carWest1.body.velocity.x < 0)
+        {
+            carWest1.body.velocity.setTo(0,0);
+            brakeSound.play();
+        }
+        else if(this.param1 == "West1" && carWest1.body.velocity.x == 0)
+        {
+            carWest1.body.velocity.setTo(-130,0);
+        }
+        else if(this.param1 == "East1" && carEast1.body.velocity.x > 0)
+        {
+            carEast1.body.velocity.setTo(0,0);
+            brakeSound.play();
+        }
+        else if(this.param1 == "East1" && carEast1.body.velocity.x == 0)
+        {
+            carEast1.body.velocity.setTo(130,0);
+        }
+
+        if(this.param1 == "North2" && carNorth2.body.velocity.y < 0)
+        {
+            carNorth2.body.velocity.setTo(0,0);
+            brakeSound.play();
+        }
+        else if(this.param1 == "North2" && carNorth2.body.velocity.y == 0)
+        {
+            carNorth2.body.velocity.setTo(0,-130);
+        }
+        else if(this.param1 == "South2" && carSouth2.body.velocity.y > 0)
+        {
+            carSouth2.body.velocity.setTo(0,0);
+            brakeSound.play();
+        }
+        else if(this.param1 == "South2" && carSouth2.body.velocity.y == 0)
+        {
+            carSouth2.body.velocity.setTo(0,130);
+        }
+        else if(this.param1 == "West2" && carWest2.body.velocity.x < 0)
+        {
+            carWest2.body.velocity.setTo(0,0);
+            brakeSound.play();
+        }
+        else if(this.param1 == "West2" && carWest2.body.velocity.x == 0)
+        {
+            carWest2.body.velocity.setTo(-130,0);
+        }
+        else if(this.param1 == "East2" && carEast2.body.velocity.x > 0)
+        {
+            carEast2.body.velocity.setTo(0,0);
+            brakeSound.play();
+        }
+        else if(this.param1 == "East2" && carEast2.body.velocity.x == 0)
+        {
+            carEast2.body.velocity.setTo(130,0);
+        }
     }
 
-    function spawnTheBall()
-    {
-      ball = game.add.sprite(game.world.centerX, game.world.centerY + 200, 'ball');
-      ball.anchor.setTo(0.5, 0.5);
-      ball.scale.setTo(0.5,0.5);
-      game.physics.enable( ball, Phaser.Physics.REAL );
+
+    function update () {
+
+        if(gameOver)
+        {
+            var style = { font: "25px Verdana", fill: "#ff0000", align: "center" };
+            var text = this.game.add.text( game.world.centerX, game.world.centerY, "Wow, you just ruined some cops mission. Game Over!", style );
+            text.anchor.setTo( 0.5, 0.0 );
+        }
+
+        if(!gameOver)
+        {
+            checkSpriteClicked();
+            //stopPlease();
+
+            game.physics.arcade.collide(carNorth1, carWest1, collisionHandler);
+            game.physics.arcade.collide(carNorth1, carEast1, collisionHandler);
+            game.physics.arcade.collide(carNorth1, carWest2, collisionHandler);
+            game.physics.arcade.collide(carNorth1, carEast2, collisionHandler);
+
+            game.physics.arcade.collide(carNorth2, carWest1, collisionHandler);
+            game.physics.arcade.collide(carNorth2, carEast1, collisionHandler);
+            game.physics.arcade.collide(carNorth2, carWest2, collisionHandler);
+            game.physics.arcade.collide(carNorth2, carEast2, collisionHandler);
+
+            game.physics.arcade.collide(carSouth1, carWest1, collisionHandler);
+            game.physics.arcade.collide(carSouth1, carEast1, collisionHandler);
+            game.physics.arcade.collide(carSouth1, carWest2, collisionHandler);
+            game.physics.arcade.collide(carSouth1, carEast2, collisionHandler);
+
+            game.physics.arcade.collide(carSouth2, carWest1, collisionHandler);
+            game.physics.arcade.collide(carSouth2, carEast1, collisionHandler);
+            game.physics.arcade.collide(carSouth2, carWest2, collisionHandler);
+            game.physics.arcade.collide(carSouth2, carEast2, collisionHandler);
+
+
+            carStatus();
+            spawnCar2();
+            
+        }
+
+        game.debug.inputInfo(32, 32);
+        game.debug.text('Elapsed seconds: ' + this.game.time.totalElapsedSeconds(), 500, 32);
     }
 
-    function collisionDetected()
+    function spawnCar2()
     {
-      ball.destroy();
-      console.log("KJ is cool");
-      scoreCount++;
-      if(scoreCount > highScore){
-        highScore = scoreCount;
-      }
-
-      cheer.play();
-
-      spawnTheBall();
-
-      hit = false;
+        if(carNorth1.y < 300)
+        {
+            carNorth2.body.velocity.setTo(0, -130);
+        }
+        if(carSouth1.y > 500)
+        {
+            carSouth2.body.velocity.setTo(0, -130);
+        }
+        if(carEast1.x > 600)
+        {
+            carEast2.body.velocity.setTo(130, 0);
+        }
+        if(carWest1.x < 200)
+        {
+            carWest2.body.velocity.setTo(-130, 0);
+        }
     }
 
-    function bucketMove()
+    function carStatus()
     {
-      if(moveRight){
-        if(bucket.x > 700)
-          moveRight = false;
-        bucket.x += speedOfBucket;
-      }
-      else{
-        if(bucket.x < 100)
-         moveRight= true;
-        bucket.x -= speedOfBucket;
-      }
-      if(ball.y < 0)
-      {
-        ball.destroy();
-        spawnTheBall();
-        hit = false;
-        scoreCount = 0;
-        boo.play();
-      }
+            if(carNorth1.y < 0)
+            {
+                var resetTime = game.rnd.integerInRange(1, 3);
+                carNorth1.x = 397;
+                carNorth1.y = 780;
+                carNorth1.body.velocity.setTo(0, 0);
+                game.time.events.add(Phaser.Timer.SECOND * resetTime, resetCar, this, "North1");
+            }
+            if(carNorth2.y < 0)
+            {
+                carNorth2.x = 397;
+                carNorth2.y = 780;
+                carNorth2.body.velocity.setTo(0, 0);
+            }
+
+            if(carSouth1.y > 780)
+            {
+                var resetTime = game.rnd.integerInRange(1, 3);
+                carSouth1.x = 312;
+                carSouth1.y = -120;
+                carSouth1.body.velocity.setTo(0, 0);
+                game.time.events.add(Phaser.Timer.SECOND * resetTime, resetCar, this, "South1");
+            }
+            if(carSouth2.y > 780)
+            {
+                carSouth2.x = 312;
+                carSouth2.y = -120;
+                carSouth2.body.velocity.setTo(0, 0);
+            }
+
+            if(carEast1.x > 780)
+            {
+                var resetTime = game.rnd.integerInRange(1, 3);
+                carEast1.x = -120;
+                carEast1.y = 380;
+                carEast1.body.velocity.setTo(0, 0);
+                game.time.events.add(Phaser.Timer.SECOND * resetTime, resetCar, this, "East1");
+            }
+            if(carEast2.x > 780)
+            {
+                carEast2.x = -120;
+                carEast2.y = 380;
+                carEast2.body.velocity.setTo(0, 0);
+            }
+
+            if(carWest1.x < 0)
+            {
+                var resetTime = game.rnd.integerInRange(1, 3);
+                carWest1.x = 770;
+                carWest1.y = 312;
+                carWest1.body.velocity.setTo(0, 0);
+                game.time.events.add(Phaser.Timer.SECOND * resetTime, resetCar, this, "West1");
+            }
+            if(carWest2.x < 0)
+            {
+                carWest2.x = 770;
+                carWest2.y = 312;
+                carWest2.body.velocity.setTo(0, 0);
+            }
+    }
+
+    function collisionHandler(){
+
+    		crashSound.play()
+            gameOver = true;
+    }
+
+    function resetCar(car)
+    {   
+        if(car == "North1")
+        {
+            carNorth1.body.velocity.setTo(0, -130);
+        }
+
+        if(car == "South1")
+        {
+            carSouth1.body.velocity.setTo(0, 130);
+        }
+
+        if(car == "East1")
+        {
+            carEast1.body.velocity.setTo(130, 0);
+        }
+
+        if(car == "West1")
+        {
+            carWest1.body.velocity.setTo(-130, 0);
+        }
+
     }
 };
