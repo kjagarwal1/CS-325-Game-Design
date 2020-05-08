@@ -64,7 +64,7 @@ window.onload = function () {
 
     goalBox = game.add.sprite(210, 75, 'box');
     goalBox.scale.setTo(.09, .0125);
-    //goalBox.sendToBack();
+    goalBox.sendToBack();
 
     defender = game.add.sprite(500, 500, 'player2');
     defender.scale.setTo(0.1, 0.1);
