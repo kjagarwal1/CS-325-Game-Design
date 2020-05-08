@@ -11,10 +11,10 @@ window.onload = function () {
     game.load.image('player2', 'assets/player2.png');
     game.load.image('goalie', 'assets/gloves.png');
     game.load.image('box', 'assets/box.jpg');
-    game.load.image('arrow', 'assets/arrow.png')
+    game.load.image('arrow', 'assets/arrow.png');
     game.load.audio('cheer', 'sounds/cheer.wav');
     game.load.audio('boo', 'sounds/boo.wav');
-  } 1
+  }
 
   var grass;
   var goal;
@@ -29,14 +29,20 @@ window.onload = function () {
   var text, text2;
   var arrow;
 
-  var wall1, wall2, wall3;
+  var wall1;
+  var wall2;
+  var wall3;
   var defender;
   var goalie;
-  var pSize;
-  var p1, p2;
-  var wallX, defX, p1X, p2X;
-  var arrowKey, spaceBar;
-  var shotX = 0, shotY = 0;
+  var p1;
+  var p2;
+  var wallX;
+  var p1X;
+  var p2X;
+  var arrowKey;
+  var spaceBar;
+  var shotX;
+  var shotY;
 
   function create() {
     boo = game.add.audio('boo');
@@ -56,40 +62,34 @@ window.onload = function () {
     goal.body.immovable = true;
     goal.body.setSize(150, 150, 40, 40);
 
-    goalBox = game.add.sprite(225, 75, 'box');
-    goalBox.scale.setTo(.075, .0125);
-    goalBox.sendToBack();
+    goalBox = game.add.sprite(210, 75, 'box');
+    goalBox.scale.setTo(.09, .0125);
+    //goalBox.sendToBack();
 
-
-    pSize = 0.1;
-    wallX = 425;
-    wall1 = game.add.sprite(wallX, 175, 'player2');
-    wall1.scale.setTo(0.1, 0.1);
-    wall2 = game.add.sprite(wallX + 25, 175, 'player2');
-    wall2.scale.setTo(0.1, 0.1);
-    wall3 = game.add.sprite(wallX + 50, 175, 'player2');
-    wall3.scale.setTo(0.1, 0.1);
-
-    defX = 500;
-    defender = game.add.sprite(defX, 500, 'player2');
+    defender = game.add.sprite(500, 500, 'player2');
     defender.scale.setTo(0.1, 0.1);
 
     goalie = game.add.sprite(200, 80, 'goalie');
     goalie.scale.setTo(0.1, 0.1);
 
-    p1X = 250;
-    p2X = 250;
-    p1 = game.add.sprite(p1X, 700, 'player1');
+  
+    wall1 = game.add.sprite(0, 175, 'player2');
+    wall1.scale.setTo(0.1, 0.1);
+    wall2 = game.add.sprite(0, 175, 'player2');
+    wall2.scale.setTo(0.1, 0.1);
+    wall3 = game.add.sprite(0, 175, 'player2');
+    wall3.scale.setTo(0.1, 0.1);
+
+    p1 = game.add.sprite(0, 700, 'player1');
     p1.scale.setTo(0.1, 0.1);
-    p2 = game.add.sprite(p2X, 350, 'player1');
+    p2 = game.add.sprite(0, 350, 'player1');
     p2.scale.setTo(0.1, 0.1);
 
-    ball = game.add.sprite(p1X + 9, 675, 'ball');
+    ball = game.add.sprite(0, 0, 'ball');
     ball.scale.setTo(0.25, 0.25);
     ball.anchor.setTo(.5);
-    game.physics.enable(ball, Phaser.Physics.REAL);
 
-    arrow = game.add.sprite(ball.x, ball.y, 'arrow');
+    arrow = game.add.sprite(0, 0, 'arrow');
     arrow.anchor.setTo(0.5, 1);
     arrow.scale.setTo(0.2, 0.1);
 
@@ -102,9 +102,30 @@ window.onload = function () {
 
     arrowKey = game.input.keyboard.createCursorKeys();
     spaceBar = game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
+
+    reset();
+    game.physics.enable(ball, Phaser.Physics.REAL);
+    game.physics.enable(p2, Phaser.Physics.REAL);
+    game.physics.enable(wall1, Phaser.Physics.REAL);
+    game.physics.enable(wall2, Phaser.Physics.REAL);
+    game.physics.enable(wall3, Phaser.Physics.REAL);
+    game.physics.enable(defender, Phaser.Physics.REAL);
+    game.physics.enable(goalie, Phaser.Physics.REAL);
+    game.physics.enable(goalBox, Phaser.Physics.REAL);
   }
 
   function update() {
+    collisionDetection();
+    
+    moveDefender();
+    moveGoalie();
+    moveBall();
+
+    handleInput();
+    text.setText("Current Score: " + scoreCount + "        High Score: " + highScore);
+  }
+
+  function collisionDetection() {
     game.physics.arcade.collide(goalBox, ball, goalScored);
     game.physics.arcade.collide(p2, ball, ballPassed);
     game.physics.arcade.collide(wall1, ball, ballBlocked);
@@ -112,13 +133,6 @@ window.onload = function () {
     game.physics.arcade.collide(wall3, ball, ballBlocked);
     game.physics.arcade.collide(defender, ball, ballGiveAway);
     game.physics.arcade.collide(goalie, ball, ballBlocked);
-
-    moveDefender();
-    moveGoalie();
-    moveBall();
-
-    handleInput();
-    text.setText("Current Score: " + scoreCount + "        High Score: " + highScore);
   }
 
   function moveBall() {
@@ -128,9 +142,7 @@ window.onload = function () {
     if (ball.x < -20 || ball.x > 620 || ball.y < -20 || ball.y > 820) {
       reset();
       scoreCount = 0;
-      text2.setText("Error");
       boo.play();
-      text2.setText("error2");
     }
   }
 
@@ -148,6 +160,7 @@ window.onload = function () {
       shotX = Math.cos((arrow.angle + 90)* Math.PI / 180) * -4;
       shotY = Math.sin((arrow.angle + 90)* Math.PI / 180) * -4;
       started = true;
+      arrow.visible = false;
     }
     if (started){
       text2.setText("");
@@ -178,7 +191,7 @@ window.onload = function () {
     else {
       if (defender.x < 100)
         defMoveRight = true;
-      defender.x -= 4 ;
+      defender.x -= 4;
     }
   }
 
@@ -194,7 +207,14 @@ window.onload = function () {
   }
 
   function ballPassed() {
-    cheer.play();
+    ball.x = p2X + 9;
+    ball.y = 320;
+    arrow.x = ball.x;
+    arrow.y = ball.y;
+    arrow.angle = 0;
+    arrow.visible = true;
+    shotX = 0;
+    shotY = 0;
   }
 
   function ballGiveAway() {
@@ -221,7 +241,19 @@ window.onload = function () {
     p1X = Math.floor(Math.random() * 350) + 125;
     p2X = Math.floor(Math.random() * 350) + 125;
 
-    ball.x = 50;
-    ball.y = 50;
+    wall1.x = wallX;
+    wall2.x = wallX + 25;
+    wall3.x = wallX + 50;
+
+    p1.x = p1X;
+    p2.x = p2X;
+
+    ball.x = p1X + 9;
+    ball.y = 675;
+
+    arrow.x = ball.x;
+    arrow.y = ball.y;
+    arrow.angle = 0;
+    arrow.visible = true;
   }
 };
