@@ -11,6 +11,7 @@ window.onload = function () {
     game.load.image('player2', 'assets/player2.png');
     game.load.image('goalie', 'assets/gloves.png');
     game.load.image('box', 'assets/box.jpg');
+    game.load.image('arrow', 'assets/arrow.png')
     game.load.audio('cheer', 'sounds/cheer.wav');
     game.load.audio('boo', 'sounds/boo.wav');
   }1
@@ -27,6 +28,7 @@ window.onload = function () {
   var defMoveRight = true;
   var gMoveRight = true;
   var text;
+  var arrow;
 
   var wall1, wall2, wall3;
   var defender;
@@ -62,29 +64,34 @@ window.onload = function () {
     pSize = 0.1;
     wallX = 200;
     wall1 = game.add.sprite(wallX, 175, 'player2');
-    wall1.scale.setTo(pSize, pSize);
+    wall1.scale.setTo(0.1, 0.1);
     wall2 = game.add.sprite(wallX + 25, 175, 'player2');
-    wall2.scale.setTo(pSize, pSize);
+    wall2.scale.setTo(0.1, 0.1);
     wall3 = game.add.sprite(wallX + 50, 175, 'player2');
-    wall3.scale.setTo(pSize, pSize);
+    wall3.scale.setTo(0.1, 0.1);
 
     defX = 500;
     defender = game.add.sprite(defX, 500, 'player2');
-    defender.scale.setTo(pSize, pSize);
+    defender.scale.setTo(0.1, 0.1);
 
     goalie = game.add.sprite(200, 80, 'goalie');
-    goalie.scale.setTo(pSize, pSize);
+    goalie.scale.setTo(0.1, 0.1);
 
     p1X = 250;
     p2X = 250;
     p1 = game.add.sprite(p1X, 700, 'player1');
-    p1.scale.setTo(pSize,pSize);
+    p1.scale.setTo(0.1, 0.1);
     p2 = game.add.sprite(p2X, 350, 'player1');
-    p2.scale.setTo(pSize, pSize);
+    p2.scale.setTo(0.1, 0.1);
 
-    ball = game.add.sprite(p1X-18, 650, 'ball');
-     ball.scale.setTo(0.25, 0.25);
+    ball = game.add.sprite(p1X+9, 675, 'ball');
+    ball.scale.setTo(0.25, 0.25);
+    ball.anchor.setTo(.5);
     game.physics.enable(ball, Phaser.Physics.REAL);
+
+    arrow = game.add.sprite(ball.x, ball.y, 'arrow');
+    arrow.anchor.setTo(0.5, 1);
+    arrow.scale.setTo(0.2,0.1);
 
     var style = { font: "25px Verdana", fill: "#9999ff", align: "center" };
     text = game.add.text(game.world.centerX - 250, 15, "Current Score: " + scoreCount + "        High Score: " + highScore, style);
