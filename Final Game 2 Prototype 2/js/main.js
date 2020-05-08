@@ -14,7 +14,7 @@ window.onload = function () {
     game.load.image('arrow', 'assets/arrow.png')
     game.load.audio('cheer', 'sounds/cheer.wav');
     game.load.audio('boo', 'sounds/boo.wav');
-  }1
+  } 1
 
   var grass;
   var goal;
@@ -22,12 +22,11 @@ window.onload = function () {
   var ball;
   var cheer;
   var boo;
-  var hit = false;
   var scoreCount = 0;
   var highScore = 0;
   var defMoveRight = true;
   var gMoveRight = true;
-  var text;
+  var text, text2;
   var arrow;
 
   var wall1, wall2, wall3;
@@ -36,13 +35,14 @@ window.onload = function () {
   var pSize;
   var p1, p2;
   var wallX, defX, p1X, p2X;
-
+  var arrowKey, spaceBar;
+  var shotX = 0, shotY = 0;
 
   function create() {
     boo = game.add.audio('boo');
-    boo.volume = 0.3;
+    boo.volume = 0.5;
     cheer = game.add.audio('cheer');
-    cheer.volume = 0.3;
+    cheer.volume = 0.5;
 
     grass = game.add.sprite(0, 650, 'grass');
     grass.scale.setTo(4, 3);
@@ -56,13 +56,13 @@ window.onload = function () {
     goal.body.immovable = true;
     goal.body.setSize(150, 150, 40, 40);
 
-    goalBox = game.add.sprite(225,75, 'box');
-    goalBox.scale.setTo(.075,.0125);
+    goalBox = game.add.sprite(225, 75, 'box');
+    goalBox.scale.setTo(.075, .0125);
     goalBox.sendToBack();
 
 
     pSize = 0.1;
-    wallX = 200;
+    wallX = 425;
     wall1 = game.add.sprite(wallX, 175, 'player2');
     wall1.scale.setTo(0.1, 0.1);
     wall2 = game.add.sprite(wallX + 25, 175, 'player2');
@@ -84,91 +84,86 @@ window.onload = function () {
     p2 = game.add.sprite(p2X, 350, 'player1');
     p2.scale.setTo(0.1, 0.1);
 
-    ball = game.add.sprite(p1X+9, 675, 'ball');
+    ball = game.add.sprite(p1X + 9, 675, 'ball');
     ball.scale.setTo(0.25, 0.25);
     ball.anchor.setTo(.5);
     game.physics.enable(ball, Phaser.Physics.REAL);
 
     arrow = game.add.sprite(ball.x, ball.y, 'arrow');
     arrow.anchor.setTo(0.5, 1);
-    arrow.scale.setTo(0.2,0.1);
+    arrow.scale.setTo(0.2, 0.1);
 
     var style = { font: "25px Verdana", fill: "#9999ff", align: "center" };
-    text = game.add.text(game.world.centerX - 250, 15, "Current Score: " + scoreCount + "        High Score: " + highScore, style);
+    text = game.add.text(game.world.centerX, 15, "Current Score: " + scoreCount + "        High Score: " + highScore, style);
+    text.anchor.setTo(.5, 0);
+
+    text2 = game.add.text(game.world.centerX, 450, "Use the Left and Right Arrow keys to aim.\nPress the Space Bar to shoot and pass", style);
+    text2.anchor.setTo(0.5, 0);
+
+    arrowKey = game.input.keyboard.createCursorKeys();
+    spaceBar = game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
   }
 
   function update() {
-    game.physics.arcade.collide(goalBox, ball, collisionDetected);
+    game.physics.arcade.collide(goalBox, ball, goalScored);
+    game.physics.arcade.collide(p2, ball, ballPassed);
+    game.physics.arcade.collide(wall1, ball, ballBlocked);
+    game.physics.arcade.collide(wall2, ball, ballBlocked);
+    game.physics.arcade.collide(wall3, ball, ballBlocked);
+    game.physics.arcade.collide(defender, ball, ballGiveAway);
+    game.physics.arcade.collide(goalie, ball, ballBlocked);
 
     moveDefender();
     moveGoalie();
-    
-    handleInput();
-    //followTheBall();
+    moveBall();
 
+    handleInput();
     text.setText("Current Score: " + scoreCount + "        High Score: " + highScore);
   }
 
-  function followTheBall() {
-    if (!hit)
-      ball.x = game.input.mousePointer.x;
+  function moveBall() {
+    ball.x += shotX;
+    ball.y += shotY;
 
-    /*
-    if(ball.x > 0 && ball.x < 700)
-    {
-      game.physics.arcade.moveToXY(ball, game.input.mousePointer.x, 600, 300);
+    if (ball.x < -20 || ball.x > 620 || ball.y < -20 || ball.y > 820) {
+      reset();
+      scoreCount = 0;
+      text2.setText("Error");
+      boo.play();
+      text2.setText("error2");
     }
-    else if(ball.x >= 0)
-    {
-      game.physics.arcade.moveToXY(ball, 0, 600, 300);
-    }
-    else if(ball.x <= 700)
-    {
-      game.physics.arcade.moveToXY(ball, 700, 600, 300);
-    }*/
   }
 
   function handleInput() {
-    if (game.input.activePointer.leftButton.isDown) {
-      hit = true;
+    var started = false;
+    if(arrowKey.right.isDown){
+      arrow.angle += 2;
+      started = true;
     }
-    if (hit) {
-      ball.y -= 6;
+    if(arrowKey.left.isDown){
+      arrow.angle -= 2;
+      started = true;
     }
-  }
-
-  function spawnTheBall() {
-    ball.destroy();
-    ball = game.add.sprite(game.world.centerX, game.world.centerY + 200, 'ball');
-    ball.anchor.setTo(0.5, 0.5);
-    ball.scale.setTo(0.5, 0.5);
-    game.physics.enable(ball, Phaser.Physics.REAL);
-  }
-
-  function collisionDetected() {
-    ball.destroy();
-    console.log("KJ is cool");
-    scoreCount++;
-    if (scoreCount > highScore) {
-      highScore = scoreCount;
+    if(spaceBar.isDown){
+      shotX = Math.cos((arrow.angle + 90)* Math.PI / 180) * -4;
+      shotY = Math.sin((arrow.angle + 90)* Math.PI / 180) * -4;
+      started = true;
     }
-    cheer.play();
-
-    spawnTheBall();
-
-    hit = false;
+    if (started){
+      text2.setText("");
+    }
   }
 
   function moveGoalie() {
-    if(gMoveRight){
+    if (gMoveRight) {
       goalie.x += 2;
-      if( goalie.x > 350 ){
+      if (goalie.x > 350) {
         gMoveRight = false;
       }
     }
-    else{
+    else {
       goalie.x -= 2;
-      if(goalie.x < 200){
+      if (goalie.x < 200) {
         gMoveRight = true;
       }
     }
@@ -178,19 +173,55 @@ window.onload = function () {
     if (defMoveRight) {
       if (defender.x > 500)
         defMoveRight = false;
-      defender.x += 3;
+      defender.x += 4;
     }
     else {
       if (defender.x < 100)
         defMoveRight = true;
-      defender.x -= 3;
+      defender.x -= 4 ;
     }
-    if (ball.y < 0) {
-      ball.destroy();
-      spawnTheBall();
-      hit = false;
-      scoreCount = 0;
-      boo.play();
+  }
+
+  function goalScored() {
+    text2.setText("GOALL!!!!");
+
+    reset();
+    scoreCount++;
+    if (scoreCount > highScore) {
+      highScore = scoreCount;
     }
+    cheer.play();
+  }
+
+  function ballPassed() {
+    cheer.play();
+  }
+
+  function ballGiveAway() {
+    text2.setText("Ball Given Away");
+
+    reset();
+    scoreCount = 0;
+    boo.play();
+  }
+
+  function ballBlocked() {
+    text2.setText("Shot Blocked");
+
+    reset();
+    scoreCount = 0;
+    boo.play();
+  }
+
+  function reset() {
+    shotY = 0;
+    shotX = 0;
+
+    wallX = Math.floor(Math.random() * 300) + 125;
+    p1X = Math.floor(Math.random() * 350) + 125;
+    p2X = Math.floor(Math.random() * 350) + 125;
+
+    ball.x = 50;
+    ball.y = 50;
   }
 };
